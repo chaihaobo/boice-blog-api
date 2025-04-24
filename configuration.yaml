@@ -1,0 +1,29 @@
+service:
+  name: "betemplate"
+  httpPort: 2222
+  grpcPort: 2223
+  metricPort: 3333
+  debug: false
+  traceCollectorURL: ""
+  env: "dev"
+  discoveryServerURL: ""
+database:
+  host: "localhost"
+  maxIdle: 10
+  maxOpen: 20
+  maxIdletime: "1m"
+  maxLifetime: "3m"
+  name: "boice"
+  password: "123456"
+  port: "3306"
+  user: "root"
+  location: "Local"
+redis:
+  address: "localhost:6379"
+  password: ""
+  index: 0
+jwt:
+  accessTokenSecretKey: "pW01vkr0Mmm9q15Iep/Aeg=="
+  refreshTokenSecretKey: "oW01vkr0Mmm9q15Iep/Aeg=="
+  accessTokenDuration: "1h"
+  refreshTokenDuration: "360h"
