@@ -3,8 +3,10 @@ package client
 import (
 	"context"
 	"database/sql"
+	"os"
 
 	"github.com/chaihaobo/gocommon/mysql"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 
 	"github.com/chaihaobo/boice-blog-api/constant"
@@ -86,6 +88,11 @@ func (c *client) DB(ctx context.Context) *gorm.DB {
 
 func New(res resource.Resource) (Client, error) {
 	dbConfig := res.Configuration().Database
+	if envMysqlPassword := os.Getenv("MYSQL_PASSWORD"); envMysqlPassword != "" {
+		dbConfig.Password = envMysqlPassword
+	}
+	res.Logger().Info(context.Background(), "mysql config", zap.Any("config", dbConfig))
+
 	gormDB, err := mysql.GormDB(mysql.Config{
 		Host:        dbConfig.Host,
 		Port:        dbConfig.Port,
