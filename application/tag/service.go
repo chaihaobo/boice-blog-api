@@ -11,7 +11,7 @@ import (
 
 type (
 	Service interface {
-		ListTags(ctx context.Context) ([]*tagdto.Tag, error)
+		ListTags(ctx context.Context, nameLike string) ([]*tagdto.Tag, error)
 	}
 
 	service struct {
@@ -20,8 +20,8 @@ type (
 	}
 )
 
-func (s service) ListTags(ctx context.Context) ([]*tagdto.Tag, error) {
-	tags, err := s.infra.Store().Repository().Tag().ListTags(ctx)
+func (s service) ListTags(ctx context.Context, nameLike string) ([]*tagdto.Tag, error) {
+	tags, err := s.infra.Store().Repository().Tag().ListTags(ctx, nameLike)
 	if err != nil {
 		s.res.Logger().Error(ctx, "list tags failed for query db", err)
 		return nil, constant.ErrSystemMalfunction

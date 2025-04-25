@@ -20,6 +20,7 @@ import (
 	"github.com/chaihaobo/boice-blog-api/model/dto/user"
 	"github.com/chaihaobo/boice-blog-api/resource"
 	"github.com/chaihaobo/boice-blog-api/transport/http/controller"
+	"github.com/chaihaobo/boice-blog-api/transport/http/middleware"
 	"github.com/chaihaobo/boice-blog-api/utils"
 )
 
@@ -86,11 +87,16 @@ func (t *transport) applyRoutes() {
 	userGroup := router.Group("/user")
 	{
 		userGroup.POST("/login", restkit.AdaptToGinHandler(restkit.HandlerFunc[*user.LoginResponse](userController.Login)))
+		userGroup.POST("/verify-permission", restkit.AdaptToGinHandler(restkit.HandlerFunc[bool](userController.VerifyPermission)))
+
 	}
 
 	articleGroup := router.Group("/articles")
 	{
 		articleGroup.GET("", restkit.AdaptToGinHandler(restkit.HandlerFunc[*page.Response[*airticle.Article]](articleController.ListArticles)))
+		articleGroup.POST("", restkit.AdaptToGinHandler(restkit.HandlerFunc[any](articleController.CreateArticle)))
+		articleGroup.GET("/:id", restkit.AdaptToGinHandler(restkit.HandlerFunc[*airticle.Article](articleController.GetArticle)))
+		articleGroup.PUT("/:id", restkit.AdaptToGinHandler(restkit.HandlerFunc[any](articleController.EditArticle)))
 	}
 
 	tagGroup := router.Group("/tags")
@@ -107,8 +113,22 @@ func NewTransport(res resource.Resource, infra infrastructure.Infrastructure, ap
 	engine := gin.New()
 	engine.Use(
 		ginmiddewate.TelemetryMiddleware(svcConfig.Name, svcConfig.Env, res.Logger()),
+		func(c *gin.Context) {
+
+			c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+			c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			if c.Request.Method != http.MethodOptions {
+				c.Next()
+				return
+			}
+			c.AbortWithStatus(200)
+		},
 		gin.Recovery(),
+		middleware.AuthMiddleware(res, app),
 	)
+	engine.ContextWithFallback = true
 
 	tsp := &transport{
 		resource:   res,

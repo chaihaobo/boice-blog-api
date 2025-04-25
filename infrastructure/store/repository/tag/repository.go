@@ -9,16 +9,20 @@ import (
 
 type (
 	Repository interface {
-		ListTags(ctx context.Context) ([]*entity.Tag, error)
+		ListTags(ctx context.Context, nameLike string) ([]*entity.Tag, error)
 	}
 	repository struct {
 		client client.Client
 	}
 )
 
-func (r repository) ListTags(ctx context.Context) ([]*entity.Tag, error) {
+func (r repository) ListTags(ctx context.Context, nameLike string) ([]*entity.Tag, error) {
 	var tags = make([]*entity.Tag, 0)
-	if err := r.client.DB(ctx).Find(&tags).Error; err != nil {
+	db := r.client.DB(ctx)
+	if nameLike != "" {
+		db = db.Where("name like ?", "%"+nameLike+"%")
+	}
+	if err := db.Find(&tags).Error; err != nil {
 		return nil, err
 	}
 	return tags, nil

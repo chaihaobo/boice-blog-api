@@ -29,6 +29,7 @@ type (
 		TraceCollectorURL  string `yaml:"traceCollectorURL"`
 		Env                string `yaml:"env"`
 		DiscoveryServerURL string `yaml:"discoveryServerURL"`
+		Password           string `yaml:"password"`
 	}
 
 	// Database is the configuration of the database.

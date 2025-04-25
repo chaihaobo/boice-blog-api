@@ -30,43 +30,38 @@ func (h *httpEndpoint) Match(request *http.Request) bool {
 }
 
 var (
-	authWhitelist = []*httpEndpoint{
-		{Method: http.MethodPost, Path: "/user/login"},
-		{Method: http.MethodGet, Path: "/health"},
-		{Method: http.MethodGet, Path: "/*/open/*"},
+	authList = []*httpEndpoint{
+		{Method: http.MethodPost, Path: "/articles"},
 	}
 )
 
 func AuthMiddleware(res resource.Resource, app application.Application) gin.HandlerFunc {
 	return func(gctx *gin.Context) {
+		token := gctx.GetHeader(headerKeyAuthorization)
+		gctx.Request = gctx.Request.WithContext(context.WithValue(gctx.Request.Context(), constant.ContextKeyPassword, token))
 		if isWhiteListRequest(gctx.Request) {
 			gctx.Next()
 			return
 		}
-		token := gctx.GetHeader(headerKeyAuthorization)
 		if token == "" {
 			restkit.HTTPWriteErr(gctx.Writer, constant.ErrUnauthorized)
 			gctx.Abort()
 			return
 		}
 
-		userClaims, err := app.User().TokenManger().Verify(token)
-		if err != nil {
-			res.Logger().Error(gctx, "verify jwt token failed", err)
+		if res.Configuration().Service.Password != token {
 			restkit.HTTPWriteErr(gctx.Writer, constant.ErrUnauthorized)
 			gctx.Abort()
 		}
-		ctx := context.WithValue(gctx.Request.Context(), constant.ContextKeyUserID, userClaims.ID)
-		gctx.Request = gctx.Request.WithContext(ctx)
 		gctx.Next()
 	}
 }
 
 func isWhiteListRequest(request *http.Request) bool {
-	if _, ok := lo.Find(authWhitelist, func(endpoint *httpEndpoint) bool {
+	if _, ok := lo.Find(authList, func(endpoint *httpEndpoint) bool {
 		return endpoint.Match(request)
 	}); ok {
-		return true
+		return false
 	}
-	return false
+	return true
 }

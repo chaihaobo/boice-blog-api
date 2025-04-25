@@ -20,7 +20,8 @@ type (
 )
 
 func (c controller) ListTags(ctx *gin.Context) ([]*tagdto.Tag, error) {
-	return c.app.Tag().ListTags(ctx)
+	query := ctx.Query("q")
+	return c.app.Tag().ListTags(ctx, query)
 }
 
 func NewController(res resource.Resource, app application.Application) Controller {
