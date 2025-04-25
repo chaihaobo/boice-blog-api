@@ -114,8 +114,18 @@ func NewTransport(res resource.Resource, infra infrastructure.Infrastructure, ap
 	engine.Use(
 		ginmiddewate.TelemetryMiddleware(svcConfig.Name, svcConfig.Env, res.Logger()),
 		func(c *gin.Context) {
+			origin := c.GetHeader("Origin")
+			allowedOrigins := map[string]bool{
+				"http://localhost:5173":           true,
+				"https:/www.chaihaobo.tech":       true,
+				"https://boice-blog.onrender.com": true,
+			}
+			if allowedOrigins[origin] {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			} else {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+			}
 
-			c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173,https:/www.chaihaobo.tech,https://boice-blog.onrender.com")
 			c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
