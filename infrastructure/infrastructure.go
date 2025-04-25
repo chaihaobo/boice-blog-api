@@ -53,7 +53,6 @@ func New(res resource.Resource) (Infrastructure, error) {
 		return nil, err
 	}
 
-	cacheClient, err := cache.NewClient(res)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +63,6 @@ func New(res resource.Resource) (Infrastructure, error) {
 
 	return &infrastructure{
 		store:           store,
-		cache:           cacheClient,
 		discoveryClient: discoveryClient,
 	}, nil
 }
