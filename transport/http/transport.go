@@ -117,7 +117,8 @@ func NewTransport(res resource.Resource, infra infrastructure.Infrastructure, ap
 			origin := c.GetHeader("Origin")
 			allowedOrigins := map[string]bool{
 				"http://localhost:5173":           true,
-				"https:/www.chaihaobo.tech":       true,
+				"https://www.chaihaobo.tech":      true,
+				"https://chaihaobo.tech":          true,
 				"https://boice-blog.onrender.com": true,
 			}
 			if allowedOrigins[origin] {
