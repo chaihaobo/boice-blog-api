@@ -22,7 +22,6 @@ type (
 func (s *service) HealthCheck(ctx context.Context) error {
 	var healthChecks = []func(context.Context) error{
 		s.infra.Store().Client().Ping,
-		s.infra.Cache().Ping,
 	}
 	for _, check := range healthChecks {
 		if err := check(ctx); err != nil {
